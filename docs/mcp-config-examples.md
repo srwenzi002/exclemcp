@@ -6,13 +6,26 @@ Before client config:
 
 ```bash
 docker build -t excel-mcp:latest .
-mkdir -p ~/excel-mcp-data
 ```
 
 ## Codex CLI
 
+Recommended: auto-bind current working directory (`$PWD`) so you can use this MCP in any project directory.
+
 ```bash
 codex mcp add excel-local \
+  -- zsh -lc 'docker run -i --rm \
+  -v "$PWD:$PWD" \
+  -w "$PWD" \
+  -e EXCEL_MCP_ROOT="$PWD" \
+  excel-mcp:latest'
+```
+
+Optional: fixed shared directory mode.
+
+```bash
+mkdir -p ~/excel-mcp-data
+codex mcp add excel-local-fixed \
   --env EXCEL_MCP_ROOT=/workspace \
   -- docker run -i --rm \
   -v "$HOME/excel-mcp-data:/workspace" \
@@ -34,16 +47,10 @@ Add to Cursor MCP config:
 {
   "mcpServers": {
     "excel-local": {
-      "command": "docker",
+      "command": "zsh",
       "args": [
-        "run",
-        "-i",
-        "--rm",
-        "-v",
-        "/Users/<you>/excel-mcp-data:/workspace",
-        "-e",
-        "EXCEL_MCP_ROOT=/workspace",
-        "excel-mcp:latest"
+        "-lc",
+        "docker run -i --rm -v \"$PWD:$PWD\" -w \"$PWD\" -e EXCEL_MCP_ROOT=\"$PWD\" excel-mcp:latest"
       ]
     }
   }
@@ -59,16 +66,10 @@ Create `.vscode/mcp.json` in your workspace:
   "servers": {
     "excel-local": {
       "type": "stdio",
-      "command": "docker",
+      "command": "zsh",
       "args": [
-        "run",
-        "-i",
-        "--rm",
-        "-v",
-        "/Users/<you>/excel-mcp-data:/workspace",
-        "-e",
-        "EXCEL_MCP_ROOT=/workspace",
-        "excel-mcp:latest"
+        "-lc",
+        "docker run -i --rm -v \"$PWD:$PWD\" -w \"$PWD\" -e EXCEL_MCP_ROOT=\"$PWD\" excel-mcp:latest"
       ]
     }
   }
